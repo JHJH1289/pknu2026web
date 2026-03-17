@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>표구조 응용</title>
+  <style>
+    body {
+      font-family: "맑은 고딕", sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      margin: 0;
+      padding: 10px 0 15px 5px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #bfbfbf;
+      margin: 0 0 10px 0;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 2px;
+      margin: 0 auto;
+      background: #f2f2f2;
+    }
+
+    caption {
+      caption-side: top;
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    th, td {
+      border: 2px solid #333;
+      width: 95px;
+      height: 70px;
+      text-align: center;
+      vertical-align: middle;
+      background: #f6e7c8;
+      font-size: 16px;
+    }
+
+    th {
+      font-weight: bold;
+    }
+
+    .green {
+      background: #a9c9a5;
+    }
+    .green_alpha{
+        color: green;
+    }
+
+    .blue {
+      background: #12b8d4;
+    }
+
+    .purple {
+      color: #7c6cff;
+    }
+    .red{
+        color: #ff6b6b;
+    }
+    .yellow{
+        background: #f9d423;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>표구조 응용</h1>
+    <hr>
+    <a href="index.html" class="home">홈으로</a>
+
+    <table>
+      <caption>표를 아파트 구조처럼 생각해보기</caption>
+      <tr>
+        <th>Line 1</th>
+        <th>Line 2</th>
+        <th>Line 3</th>
+        <th>Line 4</th>
+        <th>Line 5</th>
+      </tr>
+      <tr>
+        <td class="green">1 행 1열</td>
+        <td class="red">1 행 2열</td>
+        <td class="red">1 행 3열</td>
+        <td class="red">1 행 4열</td>
+        <td class="blue" rowspan="2">1 행 5열</td>
+      </tr>
+      <tr>
+        <td class="green">2 행 1열</td>
+        <td class="blue" colspan="2">2 행 2열</td>
+        <td>2 행 3열</td>
+      </tr>
+      <tr>
+        <td class="green purple">3 행 1열</td>
+        <td class="purple">3 행 2열</td>
+        <td class="">3 행 3열</td>
+        <td class="green_alpha">3 행 4열</td>
+        <td class="">3 행 5열</td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>
