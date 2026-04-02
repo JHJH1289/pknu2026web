@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주사위 확률 구하기</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .wrap {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .left, .right {
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .input-box {
+            margin: 15px 0;
+            border: #2c3e50 solid 2px;
+            padding: 10px;
+        }
+
+        input {
+            padding: 8px;
+            width: 140px;
+        }
+
+        button {
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        #loading {
+            color: red;
+            font-weight: bold;
+            display: none;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        th, td {
+            border: 1px solid #999;
+            padding: 10px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .graph-row {
+            margin-bottom: 12px;
+        }
+
+        .graph-label {
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .bar-wrap {
+            width: 100%;
+            background-color: #eee;
+            height: 28px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 100%;
+            color: white;
+            text-align: right;
+            line-height: 28px;
+            padding-right: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .c1 { background-color: #e74c3c; }
+        .c2 { background-color: #f39c12; }
+        .c3 { background-color: #27ae60; }
+        .c4 { background-color: #3498db; }
+        .c5 { background-color: #8e44ad; }
+        .c6 { background-color: #2c3e50; }
+    </style>
+</head>
+
+<body>
+    <h1>주사위 확률 구하기</h1>
+    <hr>
+    <a href="index.html">홈으로</a><br>
+
+    <div class="input-box">
+        <label for="count">던질 횟수: </label>
+        <input type="number" id="count" value="100000" min="1">
+        <button id="runBtn">실행</button>
+        <div id="loading">로딩 중...</div>
+    </div>
+
+    <div class="wrap">
+        <div class="left">
+            <table>
+                <thead>
+                    <tr>
+                        <th>주사위 숫자</th>
+                        <th>출현 횟수</th>
+                        <th>확률(%)</th>
+                        <th>기대값(%)</th>
+                        <th>차이(%)</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody"></tbody>
+            </table>
+        </div>
+
+        <div class="right">
+            <h3>막대 그래프</h3>
+            <div id="graphArea"></div>
+        </div>
+    </div>
+
+    <script>
+        const countInput = document.getElementById("count");
+        const runBtn = document.getElementById("runBtn");
+        const loading = document.getElementById("loading");
+        const resultBody = document.getElementById("resultBody");
+        const graphArea = document.getElementById("graphArea");
+
+        const expected = 100 / 6;
+
+        function rollDice() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+
+        function runSimulation() {
+            const total = parseInt(countInput.value, 10);
+
+            if (isNaN(total) || total < 1) {
+                alert("1 이상의 정수를 입력하세요.");
+                countInput.focus();
+                return;
+            }
+
+            runBtn.disabled = true;
+            loading.style.display = "block";
+
+            setTimeout(() => {
+                const counts = [0, 0, 0, 0, 0, 0];
+
+                for (let i = 0; i < total; i++) {
+                    const num = rollDice();
+                    counts[num - 1]++;
+                }
+
+                updateTable(counts, total);
+                updateGraph(counts, total);
+
+                loading.style.display = "none";
+                runBtn.disabled = false;
+            }, 10);
+        }
+
+        function updateTable(counts, total) {
+            resultBody.innerHTML = "";
+
+            for (let i = 0; i < 6; i++) {
+                const probability = (counts[i] / total) * 100;
+                const diff = probability - expected;
+
+                resultBody.innerHTML += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${counts[i]}</td>
+                        <td>${probability.toFixed(2)}</td>
+                        <td>${expected.toFixed(2)}</td>
+                        <td>${diff.toFixed(2)}</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function updateGraph(counts, total) {
+            graphArea.innerHTML = "";
+
+            for (let i = 0; i < 6; i++) {
+                const probability = (counts[i] / total) * 100;
+                const widthPercent = (probability / expected) * 100;
+
+                graphArea.innerHTML += `
+                    <div class="graph-row">
+                        <div class="graph-label">${i + 1}번 (${probability.toFixed(2)}%)</div>
+                        <div class="bar-wrap">
+                            <div class="bar c${i + 1}" style="width: ${widthPercent}%;">
+                                ${counts[i]}회
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        runBtn.addEventListener("click", runSimulation);
+
+        runSimulation();
+    </script>
+
+</body>
+
+</html>

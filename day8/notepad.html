@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo Landing + Chat Modal</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(135deg, #dbeafe, #eff6ff, #f8fafc);
+        color: #222;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .wrap {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* 헤더 */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        background-color: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2563eb;
+      }
+
+      .nav {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .nav a {
+        font-size: 0.95rem;
+        color: #444;
+      }
+
+      .chat-open-btn {
+        border: none;
+        background-color: #2563eb;
+        color: white;
+        padding: 10px 18px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.95rem;
+      }
+
+      .chat-open-btn:hover {
+        background-color: #1d4ed8;
+      }
+
+      /* 메인 */
+      .hero {
+        width: min(1100px, 92%);
+        margin: 60px auto 30px;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 30px;
+        align-items: center;
+      }
+
+      .hero-text h1 {
+        font-size: 3rem;
+        line-height: 1.2;
+        margin-bottom: 16px;
+      }
+
+      .hero-text p {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: #555;
+        margin-bottom: 24px;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      .primary-btn,
+      .secondary-btn {
+        border: none;
+        border-radius: 14px;
+        padding: 14px 22px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      .primary-btn {
+        background-color: #2563eb;
+        color: white;
+      }
+
+      .primary-btn:hover {
+        background-color: #1d4ed8;
+      }
+
+      .secondary-btn {
+        background-color: white;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+      }
+
+      .secondary-btn:hover {
+        background-color: #eff6ff;
+      }
+
+      /* todo 카드 */
+      .todo-card {
+        background-color: white;
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+      }
+
+      .todo-card h2 {
+        margin-top: 0;
+        margin-bottom: 8px;
+      }
+
+      .todo-card p {
+        margin-top: 0;
+        color: #666;
+        font-size: 0.95rem;
+      }
+
+      .todo-input-wrap {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .todo-input-wrap input {
+        flex: 1;
+        padding: 13px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 1rem;
+        outline: none;
+      }
+
+      .todo-input-wrap button {
+        border: none;
+        padding: 13px 18px;
+        background-color: #22c55e;
+        color: white;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+
+      .todo-input-wrap button:hover {
+        background-color: #16a34a;
+      }
+
+      .todo-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .todo-list li {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .todo-list li.done .todo-text {
+        text-decoration: line-through;
+        color: #94a3b8;
+      }
+
+      .todo-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+      }
+
+      .todo-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .todo-actions button {
+        border: none;
+        padding: 7px 10px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .done-btn {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .del-btn {
+        background-color: #fee2e2;
+        color: #dc2626;
+      }
+
+      /* 소개 섹션 */
+      .features {
+        width: min(1100px, 92%);
+        margin: 20px auto 70px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+
+      .feature {
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      }
+
+      .feature h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+
+      .feature p {
+        margin: 0;
+        line-height: 1.6;
+        color: #555;
+      }
+
+      /* 모달 */
+      .modal-wrap {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.45);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        z-index: 100;
+      }
+
+      .modal-wrap.show {
+        display: flex;
+      }
+
+      .modal-box {
+        width: 100%;
+        max-width: 620px;
+        background-color: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 22px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .modal-header h2 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .close-btn {
+        border: none;
+        background: #f1f5f9;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        font-size: 1.1rem;
+        cursor: pointer;
+      }
+
+      .close-btn:hover {
+        background: #e2e8f0;
+      }
+
+      /* 채팅 */
+      .chat-container {
+        height: 500px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        background-color: #f8fbff;
+      }
+
+      .message {
+        display: flex;
+        align-items: flex-end;
+        margin-bottom: 18px;
+      }
+
+      .message.bot {
+        justify-content: flex-start;
+      }
+
+      .message.user {
+        justify-content: flex-end;
+      }
+
+      .name {
+        font-size: 0.8rem;
+        color: #555;
+        margin: 0 10px 4px;
+      }
+
+      .user .name {
+        text-align: right;
+      }
+
+      .bubble {
+        max-width: 320px;
+        background-color: #d4d4d3;
+        padding: 12px 18px;
+        border-radius: 20px;
+        word-break: break-word;
+        line-height: 1.5;
+      }
+
+      .user .bubble {
+        background-color: #fff77a;
+      }
+
+      .chat-input-area {
+        display: flex;
+        gap: 10px;
+        padding: 16px 20px 20px;
+        border-top: 1px solid #e5e7eb;
+        background-color: white;
+      }
+
+      .chat-input-area input {
+        flex: 1;
+        padding: 13px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        outline: none;
+        font-size: 1rem;
+      }
+
+      .chat-input-area button {
+        border: none;
+        padding: 13px 18px;
+        border-radius: 14px;
+        background-color: #2563eb;
+        color: white;
+        cursor: pointer;
+      }
+
+      .chat-input-area button:hover {
+        background-color: #1d4ed8;
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .features {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-text h1 {
+          font-size: 2.2rem;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .header {
+          padding: 16px 20px;
+        }
+
+        .hero {
+          margin-top: 30px;
+        }
+
+        .todo-input-wrap,
+        .chat-input-area {
+          flex-direction: column;
+        }
+
+        .modal-box {
+          max-width: 100%;
+        }
+
+        .chat-container {
+          height: 420px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="header">
+        <div class="logo">TodoChat</div>
+        <nav class="nav">
+          <a href="#">홈</a>
+          <a href="#">기능</a>
+          <a href="#">문의</a>
+          <button class="chat-open-btn" id="openChatBtn">채팅 열기</button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-text">
+            <h1>할 일 관리와 채팅을 한 화면에서</h1>
+            <p>
+              랜딩 페이지는 투두리스트 중심으로 보여주고, 필요할 때만 모달
+              채팅창을 띄우는 구조입니다. 깔끔한 첫 화면과 대화형 UI를 같이
+              가져갈 수 있습니다.
+            </p>
+            <div class="hero-buttons">
+              <button class="primary-btn" id="heroChatBtn">채팅 시작</button>
+              <button class="secondary-btn">더 알아보기</button>
+            </div>
+          </div>
+
+          <div class="todo-card">
+            <h2>오늘의 할 일</h2>
+            <p>간단한 투두리스트 예제입니다.</p>
+
+            <div class="todo-input-wrap">
+              <input
+                type="text"
+                id="todoInput"
+                placeholder="할 일을 입력하세요"
+              />
+              <button id="addTodoBtn">추가</button>
+            </div>
+
+            <ul class="todo-list" id="todoList">
+              <li>
+                <div class="todo-left">
+                  <span class="todo-text">HTML 구조 잡기</span>
+                </div>
+                <div class="todo-actions">
+                  <button class="done-btn">완료</button>
+                  <button class="del-btn">삭제</button>
+                </div>
+              </li>
+              <li>
+                <div class="todo-left">
+                  <span class="todo-text">CSS 스타일링 적용</span>
+                </div>
+                <div class="todo-actions">
+                  <button class="done-btn">완료</button>
+                  <button class="del-btn">삭제</button>
+                </div>
+              </li>
+              <li>
+                <div class="todo-left">
+                  <span class="todo-text">모달 채팅창 연결</span>
+                </div>
+                <div class="todo-actions">
+                  <button class="done-btn">완료</button>
+                  <button class="del-btn">삭제</button>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="features">
+          <div class="feature">
+            <h3>간단한 구성</h3>
+            <p>
+              HTML, CSS, JavaScript만으로도 랜딩 페이지와 모달 채팅창을 함께
+              만들 수 있습니다.
+            </p>
+          </div>
+          <div class="feature">
+            <h3>직관적인 사용</h3>
+            <p>
+              메인 화면에서는 할 일을 관리하고, 버튼을 누르면 대화창이 바로
+              열립니다.
+            </p>
+          </div>
+          <div class="feature">
+            <h3>확장 쉬움</h3>
+            <p>
+              나중에 로그인, 알림, 로컬스토리지 저장 같은 기능도 쉽게 붙일 수
+              있습니다.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- 모달 채팅창 -->
+    <div class="modal-wrap" id="chatModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2>채팅 상담</h2>
+          <button class="close-btn" id="closeChatBtn">✕</button>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+          <div class="message bot">
+            <div>
+              <div class="name">myBot</div>
+              <div class="bubble">
+                안녕하세요! 무엇을 도와드릴까요? 궁금한 점이 있으시면 언제든
+                물어보세요. 😊
+              </div>
+            </div>
+          </div>
+
+          <div class="message user">
+            <div>
+              <div class="name">나</div>
+              <div class="bubble">
+                이 랜딩 페이지에서 채팅을 모달로 띄우고 싶어요.
+              </div>
+            </div>
+          </div>
+
+          <div class="message bot">
+            <div>
+              <div class="name">myBot</div>
+              <div class="bubble">
+                가능합니다. 메인 화면은 투두리스트로 두고, 버튼 클릭 시 모달을
+                열면 됩니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <input
+            type="text"
+            id="chatInput"
+            placeholder="메시지를 입력하세요"
+          />
+          <button id="sendChatBtn">전송</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const chatModal = document.getElementById("chatModal");
+      const openChatBtn = document.getElementById("openChatBtn");
+      const heroChatBtn = document.getElementById("heroChatBtn");
+      const closeChatBtn = document.getElementById("closeChatBtn");
+
+      const todoInput = document.getElementById("todoInput");
+      const addTodoBtn = document.getElementById("addTodoBtn");
+      const todoList = document.getElementById("todoList");
+
+      const chatInput = document.getElementById("chatInput");
+      const sendChatBtn = document.getElementById("sendChatBtn");
+      const chatContainer = document.getElementById("chatContainer");
+
+      function openModal() {
+        chatModal.classList.add("show");
+      }
+
+      function closeModal() {
+        chatModal.classList.remove("show");
+      }
+
+      openChatBtn.addEventListener("click", openModal);
+      heroChatBtn.addEventListener("click", openModal);
+      closeChatBtn.addEventListener("click", closeModal);
+
+      chatModal.addEventListener("click", function (e) {
+        if (e.target === chatModal) {
+          closeModal();
+        }
+      });
+
+      function createTodoItem(text) {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+          <div class="todo-left">
+            <span class="todo-text">${text}</span>
+          </div>
+          <div class="todo-actions">
+            <button class="done-btn">완료</button>
+            <button class="del-btn">삭제</button>
+          </div>
+        `;
+
+        const doneBtn = li.querySelector(".done-btn");
+        const delBtn = li.querySelector(".del-btn");
+
+        doneBtn.addEventListener("click", function () {
+          li.classList.toggle("done");
+        });
+
+        delBtn.addEventListener("click", function () {
+          li.remove();
+        });
+
+        return li;
+      }
+
+      addTodoBtn.addEventListener("click", function () {
+        const text = todoInput.value.trim();
+        if (text === "") return;
+
+        const item = createTodoItem(text);
+        todoList.appendChild(item);
+        todoInput.value = "";
+        todoInput.focus();
+      });
+
+      todoInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          addTodoBtn.click();
+        }
+      });
+
+      document.querySelectorAll(".todo-list li").forEach(function (li) {
+        const doneBtn = li.querySelector(".done-btn");
+        const delBtn = li.querySelector(".del-btn");
+
+        doneBtn.addEventListener("click", function () {
+          li.classList.toggle("done");
+        });
+
+        delBtn.addEventListener("click", function () {
+          li.remove();
+        });
+      });
+
+      function addMessage(text, type) {
+        const message = document.createElement("div");
+        message.className = `message ${type}`;
+
+        const name = type === "user" ? "나" : "myBot";
+
+        message.innerHTML = `
+          <div>
+            <div class="name">${name}</div>
+            <div class="bubble">${text}</div>
+          </div>
+        `;
+
+        chatContainer.appendChild(message);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      sendChatBtn.addEventListener("click", function () {
+        const text = chatInput.value.trim();
+        if (text === "") return;
+
+        addMessage(text, "user");
+        chatInput.value = "";
+
+        setTimeout(function () {
+          addMessage("메시지를 잘 받았습니다. 계속 말씀해 주세요.", "bot");
+        }, 500);
+      });
+
+      chatInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          sendChatBtn.click();
+        }
+      });
+    </script>
+  </body>
+</html>

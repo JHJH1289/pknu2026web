@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 문제</title>
+</head>
+
+<body>
+    <h1></h1>
+    <hr>
+    <a href="index.html">홈으로</a><br>
+    <script>
+        // 오늘의 문제
+        const box = ["딸기", "바나나", "사과", "수박", "키위", "포도"];
+        const removeItem = prompt(`{${box}} 중에 제거하고 싶은 품목을 입력하세요.`);
+        const removeIndex = box.indexOf(removeItem);
+
+        if (removeIndex !== -1) {
+            box.splice(removeIndex, 1);
+        } else {
+            alert("해당 품목이 없습니다.");
+        }
+
+
+        const addItem = prompt(`{${box}} 외에 추가하고 싶은 품목을 입력하세요.`);
+        const addIndex = box.indexOf(addItem);
+
+
+        if (addIndex === -1 && addItem) {
+            box.push(addItem);
+        } else if (addItem) {
+            alert("해당 품목이 이미 있습니다.");
+        }
+
+        document.body.innerHTML = `정리된 품목은 {${box}} 입니다.`;
+    </script>
+</body>
+
+</html>

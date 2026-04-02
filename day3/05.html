@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>공 튀기기</title>
+    <style>
+        .ball {
+            position: absolute;
+            left: 120px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgb(51, 182, 199);
+            animation: bounce 3.5s infinite ease-in-out;
+            transform-origin: center bottom;
+        }
+        @keyframes bounce {
+            0% {
+                top: 40px;
+                transform: scaleX(1) scaleY(1);
+            }
+
+            45% {
+                top: 520px;
+                transform: scaleX(1) scaleY(1);
+            }
+
+            50% {
+                top: 600px;
+                transform: scaleX(1.2) scaleY(0.8);
+            }
+
+            55% {
+                top: 520px;
+                transform: scaleX(1) scaleY(1);
+            }
+
+            100% {
+                top: 40px;
+                transform: scaleX(1) scaleY(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ball"></div>
+</body>
+
+</html>

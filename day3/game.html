@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        canvas {
+            border: 1px solid hsl(0, 0%, 83%);
+            background-color: #f1f1f1;
+        }
+
+        .intro {
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body style="background-color: bisque;">
+    <audio src="up.mp3" id="up"></audio>
+    <div class="intro">
+        <h1 style="color: green;">수박 게임</h1>
+        <p style="color: red">공을 클릭으로 놓아서 보라색으로 만들어 보세요!</p>
+        <p><img src="수박게임.gif" id="gameGif"></p>
+        <div class="start-button">
+            <button onclick="startGame()">게임 시작</button>
+        </div>
+        <br>
+        <button onclick="showInstructions()">게임 설명</button>
+    </div>
+    <script>
+        var myGamePiece;
+        var balls = [];
+        var score = 0;
+        var gameInterval;
+        var startTime;
+        myGamePiece = new component();
+
+        function showIntro() {
+            var introDiv = document.querySelector(".intro");
+            introDiv.style.display = "block";
+        }
+        function hideIntro() {
+            var introDiv = document.querySelector(".intro");
+            introDiv.style.display = "none";
+        }
+        function showInstructions() {
+            alert("수박 게임입니다.\n" +
+                "I : 마우스로 공을 위에서 떨어뜨려 보세요!\nII. 같은 크기의 공들이 만나게 되면 한 단계 큰 공으로 진화 합니다!\n" +
+                "III : 공은 빨 주 노 초 파 남 보 순으로 커지게 됩니다!");
+        }
+        function startGame() {
+            hideIntro();
+            myGameArea.start();
+            gameInterval = setInterval(checkGameStatus, 500);
+            startTime = new Date().getTime();
+        }
+
+        var myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = 500;
+                this.canvas.height = 600;
+                this.context = this.canvas.getContext("2d");
+                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                this.interval = setInterval(updateGameArea, 5);
+                this.canvas.onclick = addBall;
+            },
+            clear: function () {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+
+        function component(radius, x, y, type) {
+            this.type = type;
+            this.radius = radius;
+            this.x = x;
+            this.y = y;
+
+            this.speedX = 0;
+            this.speedY = 0;
+
+            this.gravity = 0.1;
+            this.gravitySpeed = 0;
+            this.bounce = 0.2;
+            this.color = sizeToColor(radius);
+            this.update = function () {
+                ctx = myGameArea.context;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            this.newPos = function () {
+                this.gravitySpeed += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY + this.gravitySpeed;
+                this.hitBottom();
+                this.hitRight();
+                this.hitLeft();
+            }
+            this.hitBottom = function () {
+                var rockbottom = myGameArea.canvas.height - this.radius;
+                if (this.y > rockbottom) {
+                    this.y = rockbottom;
+                    this.gravitySpeed = -(this.gravitySpeed * this.bounce);
+                }
+            }
+            this.hitRight = function () {
+                var rightEdge = myGameArea.canvas.width - this.radius;
+                if (this.x > rightEdge) {
+                    this.x = rightEdge;
+                    this.speedX = -Math.abs(this.speedX);
+                }
+            }
+            this.hitLeft = function () {
+                var leftEdge = this.radius;
+                if (this.x < leftEdge) {
+                    this.x = leftEdge;
+                    this.speedX = Math.abs(this.speedX);
+                }
+            }
+        }
+
+        function sizeToColor(radius) {
+            if (radius <= 30) {
+                return "red";
+            } else if (radius <= 40) {
+                return "orange";
+            } else if (radius <= 50) {
+                return "yellow";
+            } else if (radius <= 60) {
+                return "green";
+            } else if (radius <= 80) {
+                return "blue";
+            } else if (radius <= 100) {
+                return "#000080";
+            } else {
+                return "indigo"
+            }
+        }
+
+        function updateGameArea() {
+            myGameArea.clear();
+            var ctx = myGameArea.context;
+            ctx.beginPath();
+            ctx.moveTo(0, 100);
+            ctx.lineTo(myGameArea.canvas.width, 100);
+            ctx.strokeStyle = "gray";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            for (var i = 0; i < balls.length; i++) {
+                balls[i].newPos();
+                balls[i].update();
+                checkCollision(balls[i], i);
+            }
+            updateScore();
+        }
+
+        function addBall(event) {
+            var rect = myGameArea.canvas.getBoundingClientRect();
+            var mouseX = event.clientX - rect.left;
+            var mouseY = event.clientY - rect.top;
+
+            if (mouseY < 100) {
+                var ball = new component(25, mouseX, mouseY);
+                balls.push(ball);
+            }
+        }
+
+        function checkCollision(ball, index) {
+            for (var i = 0; i < balls.length; i++) {
+                if (i !== index) {
+                    var otherBall = balls[i];
+                    var dx = ball.x - otherBall.x;
+                    var dy = ball.y - otherBall.y;
+                    var distance = Math.sqrt(dx * dx + dy * dy);
+                    var minDistance = ball.radius + otherBall.radius;
+
+                    if (distance < minDistance) {
+                        var angle = Math.atan2(dy, dx);
+                        var targetX = ball.x + Math.cos(angle) * minDistance;
+                        var targetY = ball.y + Math.sin(angle) * minDistance;
+                        var ax = (targetX - otherBall.x) * 0.5;
+                        var ay = (targetY - otherBall.y) * 0.5;
+
+                        ball.x += ax;
+                        ball.y += ay;
+                        otherBall.x -= ax;
+                        otherBall.y -= ay;
+
+                        if (ball.radius === otherBall.radius) {
+
+                            var audio = document.getElementById("up");
+                            audio.play();
+
+                            balls.splice(balls.indexOf(ball), 1);
+                            balls.splice(balls.indexOf(otherBall), 1);
+
+                            var newBall = new component(ball.radius * 1.3, ball.x, ball.y);
+                            balls.push(newBall);
+                            score += 100;
+                        }
+                    }
+                }
+            }
+        }
+
+        function updateScore() {
+            ctx = myGameArea.context;
+            ctx.fillStyle = "black";
+            ctx.font = "20px Arial";
+            ctx.fillText("Score: " + score, myGameArea.canvas.width - 130, 30);
+        }
+
+        function checkGameStatus() {
+            var currentTime = new Date().getTime();
+            var endTime = (currentTime - startTime) / 1000;
+            for (var i = 0; i < balls.length; i++) {
+                if (balls[i].color === "indigo") {
+                    clearInterval(gameInterval);
+                    endGame(endTime);
+                    break;
+                }
+            }
+        }
+
+        function endGame(endTime) {
+            alert("게임 종료\n" +
+                "점수: " + score + "\n" +
+                "걸린 시간: " + endTime.toFixed(1) + "초");
+        }
+    </script>
+</body>
+
+</html>

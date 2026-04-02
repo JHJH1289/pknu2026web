@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자리배치 프로그램</title>
+  <style>
+    body {
+      text-align: center;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .seat {
+      display: inline-block;
+      width: 40px;
+      height: 40px; 
+      line-height: 40px;
+      margin: 3px;
+      background-color: rgb(81, 160, 192);
+      border-radius: 0;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <h1>자리배치 프로그램</h1>
+  <hr>
+  <a href="index.html">홈으로</a><br>
+
+  <script>
+    const total = parseInt(prompt("총 인원을 입력하세요"), 10);
+    const col = parseInt(prompt("한 줄에 앉을 인원을 입력하세요"), 10);
+    const seatContainer = document.getElementById("seatContainer");
+
+    for (let i = 1; i <= total; i++) {
+      document.write(`<span class="seat">${i}</span>`);
+      if (i % col === 0) {
+        document.write("<br>");
+      }
+    }
+  </script>
+</body>
+</html>

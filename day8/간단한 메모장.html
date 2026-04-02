@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>간단한 TodoList</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 500px;
+      margin: 30px auto;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .input-box {
+      margin-bottom: 20px;
+    }
+
+    input,
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .todo {
+      border: 1px solid #ccc;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+
+    .todo h3 {
+      margin: 0 0 8px 0;
+    }
+
+    .todo.done h3 {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-group button {
+      flex: 1;
+    }
+
+    .date {
+      color: #666;
+      font-size: 12px;
+    }
+
+    /* 작은 채팅 버튼 */
+    .chat-fab {
+      position: fixed;
+      right: 25px;
+      bottom: 25px;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      background-color: #4f8dfd;
+      color: white;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      z-index: 1000;
+    }
+
+    .chat-fab:hover {
+      background-color: #2f6fe6;
+    }
+
+    /* 모달 */
+    .chat-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.45);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .chat-modal.show {
+      display: flex;
+    }
+
+    .chat-box {
+      width: 420px;
+      max-width: 90vw;
+      height: 550px;
+      background-color: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      background-color: #4f8dfd;
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .close-btn {
+      background: white;
+      color: #4f8dfd;
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      font-weight: bold;
+      margin-top: 0;
+      padding: 0;
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background-color: #f7f9fc;
+    }
+
+    .message {
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message.user {
+      align-items: flex-end;
+    }
+
+    .message.bot {
+      align-items: flex-start;
+    }
+
+    .name {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .bubble {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .message.bot .bubble {
+      background-color: #e5e7eb;
+    }
+
+    .message.user .bubble {
+      background-color: #fff59d;
+    }
+
+    .chat-input-area {
+      border-top: 1px solid #ddd;
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      background-color: white;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      margin-top: 0;
+    }
+
+    .chat-input-area button {
+      width: 90px;
+      margin-top: 0;
+      background-color: #4f8dfd;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+
+    .chat-input-area button:hover {
+      background-color: #2f6fe6;
+    }
+  </style>
+</head>
+<body>
+  <h1>TodoList</h1>
+
+  <div class="input-box">
+    <input type="text" id="todoInput" placeholder="할 일을 입력하세요" />
+    <button onclick="saveTodo()">저장</button>
+  </div>
+
+  <div id="todoList"><p>저장된 할 일이 없습니다.</p></div>
+
+  <!-- 하단 작은 채팅 버튼 -->
+  <button class="chat-fab" onclick="openChat()">채팅</button>
+
+  <!-- 채팅 모달 -->
+  <div class="chat-modal" id="chatModal">
+    <div class="chat-box">
+      <div class="chat-header">
+        <h2>채팅창</h2>
+        <button class="close-btn" onclick="closeChat()">X</button>
+      </div>
+
+      <div class="chat-body" id="chatBody">
+        <div class="message bot">
+          <div class="name">myBot</div>
+          <div class="bubble">안녕하세요. 무엇을 도와드릴까요?</div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="메시지를 입력하세요" />
+        <button onclick="sendMessage()">전송</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let todos = JSON.parse(localStorage.getItem("todos")) || [];
+    let editId = null;
+
+    function saveToLocalStorage() {
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }
+
+    function renderTodos() {
+      const todoList = document.getElementById("todoList");
+      todoList.innerHTML = "";
+
+      if (todos.length === 0) {
+        todoList.innerHTML = "<p>저장된 할 일이 없습니다.</p>";
+        return;
+      }
+
+      todos.forEach(function(todo) {
+        todoList.innerHTML += `
+          <div class="todo ${todo.completed ? "done" : ""}">
+            <h3>${todo.text}</h3>
+            <div class="date">${todo.createdAt}</div>
+            <div class="btn-group">
+              <button onclick="toggleTodo(${todo.id})">
+                ${todo.completed ? "미완료" : "완료"}
+              </button>
+              <button onclick="editTodo(${todo.id})">수정</button>
+              <button onclick="deleteTodo(${todo.id})">삭제</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function saveTodo() {
+      const text = document.getElementById("todoInput").value.trim();
+
+      if (text === "") {
+        alert("할 일을 입력하세요.");
+        return;
+      }
+
+      if (editId === null) {
+        const todo = {
+          id: Date.now(),
+          text: text,
+          completed: false,
+          createdAt: new Date().toLocaleString()
+        };
+        todos.push(todo);
+      } else {
+        const index = todos.findIndex(function(todo) {
+          return todo.id === editId;
+        });
+
+        if (index !== -1) {
+          todos[index].text = text;
+        }
+
+        editId = null;
+      }
+
+      saveToLocalStorage();
+      renderTodos();
+      document.getElementById("todoInput").value = "";
+    }
+
+    function editTodo(id) {
+      const todo = todos.find(function(item) {
+        return item.id === id;
+      });
+
+      if (!todo) return;
+
+      document.getElementById("todoInput").value = todo.text;
+      editId = id;
+    }
+
+    function deleteTodo(id) {
+      todos = todos.filter(function(todo) {
+        return todo.id !== id;
+      });
+
+      saveToLocalStorage();
+      renderTodos();
+    }
+
+    function toggleTodo(id) {
+      const todo = todos.find(function(item) {
+        return item.id === id;
+      });
+
+      if (!todo) return;
+
+      todo.completed = !todo.completed;
+      saveToLocalStorage();
+      renderTodos();
+    }
+
+    function openChat() {
+      document.getElementById("chatModal").classList.add("show");
+    }
+
+    function closeChat() {
+      document.getElementById("chatModal").classList.remove("show");
+    }
+
+    function sendMessage() {
+      const chatInput = document.getElementById("chatInput");
+      const chatBody = document.getElementById("chatBody");
+      const text = chatInput.value.trim();
+
+      if (text === "") return;
+
+      chatBody.innerHTML += `
+        <div class="message user">
+          <div class="name">나</div>
+          <div class="bubble">${text}</div>
+        </div>
+      `;
+
+      chatInput.value = "";
+
+      setTimeout(function() {
+        chatBody.innerHTML += `
+          <div class="message bot">
+            <div class="name">myBot</div>
+            <div class="bubble">메시지를 확인했습니다.</div>
+          </div>
+        `;
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 300);
+
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    document.getElementById("chatModal").addEventListener("click", function(e) {
+      if (e.target.id === "chatModal") {
+        closeChat();
+      }
+    });
+
+    document.getElementById("chatInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    renderTodos();
+  </script>
+</body>
+</html>
